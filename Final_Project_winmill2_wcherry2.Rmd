@@ -11,6 +11,11 @@ urlcolor: cyan
 
 # Final Project
 
+```{r}
+library(readr)
+schoolData = read_csv("SchoolData.csv")
+```
+
 
 ### Introduction
 
