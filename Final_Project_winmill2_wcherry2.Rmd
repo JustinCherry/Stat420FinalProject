@@ -13,7 +13,7 @@ urlcolor: cyan
 # Project Proposal
 
 ### Team Members - Net Id
-- Bryan Winmill - winmill2
+- Bryan Winmill - winmill2 - This is a test
 - Justin Cherry - wcherry2
 
 ### Tentative Project Title:
