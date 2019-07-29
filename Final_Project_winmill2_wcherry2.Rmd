@@ -13,10 +13,30 @@ urlcolor: cyan
 
 
 ### Introduction
+The introduction section should relay what you are attempting to accomplish. It should provide enough background to your work such that a reader would not need to load your data to understand your report. Like the simulation project, you can assume the reader is familiar with the course concepts, but not your data. Some things to consider:
 
+    What is this data? Where did it come from? What are the variables? Why is it interesting to you?
+    Why are you creating a model for this data? What is the goal of this model?
+    
 - TODO: Write a good explanation.
 
 ### Methods
+
+The methods section should contain the bulk of your “work.” This section will contain the bulk of the R code that is used to generate the results. Your R code is not expected to be perfect idiomatic R, but it is expected to be understood by a reader without too much effort. Use RMarkdown and code comments to your advantage to explain your code if needed.
+
+This section should contain any information about data preparation that is performed to the original data before modelling. Then you will apply methods seen in class, which may include some of the following but are not limited to:
+
+    Multiple linear regression
+    ANOVA
+    Dummy variables
+    Interaction
+    Residual diagnostics
+    Outlier diagnostics
+    Transformations
+    Polynomial regression
+    Model selection
+
+Your task is not to use as many methods as possible. Your task is to use appropriate methods to find a good model that can correctly answer a question about the dataset, and then to communicate your result effectively.
 
 ```{r}
 library(readr)
@@ -49,6 +69,8 @@ schoolData = read_csv("SchoolData.csv")
 - A practical conclusion
 
 ### Results
+The results section should contain numerical or graphical summaries of your results. You should report a final model you have chosen. There is not necessarily one, singular correct model, but certainly some methods and models are better than others in certain situations. You may use any methods we studied this semester to complete this task and provide evidence that your final choice of model is a good one.
+
 
 - TODO: Plot results of diagnostics/evidence (ANOVA)
 
@@ -57,11 +79,29 @@ schoolData = read_csv("SchoolData.csv")
 - TODO: Create table (possibly)
 
 ### Discussion
+The discussion section should contain discussion of your results. This should frame your results in the context of the data. How is your final model useful?
 
 - TODO: Write a good discussion
 
 ### Appendix - TODO: REMOVE IF NOT USED
+The appendix section should contain code and analysis that is used, but that may clutter the report or is not directly related to the choice of mode
 
 - TODO: EXTRA CRAP IF ANY
 
+
+
+### Rubric - TODO: Remove before submission
+
+DUE: Sat, 8/3/2019
+Introduction (10 pts): This section fully provides background to your work such that a reader understands the purpose and goal of the data analysis project.
+
+Methods (20 pts): This section will contain the bulk of the modeling decisions and R code that is used to generate the results. Have you used the appropriate methods for your dataset? Have you applied them correctly?
+
+Results (15 pts): This section contains numerical or graphical summaries of your results as they pertain to the goal of the project. Do you arrive at the correct statistical conclusions from the analyses you perform? Did you make appropriate adjustments to your model selection and methods based on your results?
+
+Discussion (15 pts): This section provides a full discussion of the results. It should include your observations and analysis that tie the Introduction, Methods, and Results together. The discussion should address the primary statistical themes of the analysis and your discoveries, and your interpretation of the results. Do you discuss your analysis results in the context of the data?
+
+RMarkdown Usage and Programming Efficacy (15 pts): The Rmd file performs the required tasks in an efficient method and is fully correct. The simulated data is created, read, and accessed according to best practices. The R and RMarkdown usage address the needs of the Methods section and produces what is displayed in the Results section. Does your code perform the desired task? Is your code readable?
+
+Neatness and Organization of the Report and Rmd files (15 pts): The Rmd file and Report are written and presented in a conventional style using appropriate spacing that is easy to read. The Report attempts to answer what was asked for in the directions and addressed in the Introduction. Plots are easily readable and self-explanatory. R output is limited to what is necessary to directly answer the exercise. Is your report easy to read? Is it written in a manner such that a reader does not already need to be familiar with the data?
 
