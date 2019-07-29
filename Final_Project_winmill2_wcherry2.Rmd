@@ -11,24 +11,57 @@ urlcolor: cyan
 
 # Final Project
 
+
+### Introduction
+
+- TODO: Write a good explanation.
+
+### Methods
+
 ```{r}
 library(readr)
 schoolData = read_csv("SchoolData.csv")
 ```
 
+- TODO: Look into using test and train data
 
-### Introduction
+- TODO: Calculate Standard Error
 
+- TODO: Fit FULL model
 
-### Methods
+- TODO: Run AIC and BIC tests to find best model
 
+- TODO: Fit the model
+
+- TODO: Run Diagnostics on model (Shapiro and Other)
+
+- TODO: Test model
+
+- TODO: Anova to show model we are using is best
+
+- TODO: Check residuals/outliers/how much leverage
+
+- TODO: LOOK AT BELOW OPTIONS
+- The null hypothesis of the test
+- The test statistic of the test
+- The p-value of the test
+- A statistical decision
+- A practical conclusion
 
 ### Results
 
+- TODO: Plot results of diagnostics/evidence (ANOVA)
+
+- TODO: Plot model and/or data (PLOT/HIST/SCAT)
+
+- TODO: Create table (possibly)
 
 ### Discussion
 
+- TODO: Write a good discussion
 
-### Appendix
+### Appendix - TODO: REMOVE IF NOT USED
+
+- TODO: EXTRA CRAP IF ANY
 
 
