@@ -9,60 +9,21 @@ output:
 urlcolor: cyan
 ---
 
-
-# Project Proposal
-
-### Team Members - Net Id
-- Bryan Winmill - winmill2 - This is a test
-- Justin Cherry - wcherry2 - This is also a test
-
-### Tentative Project Title:
-- College Basketball School Performance
-
-### Description of Dataset:
-This dataset includes data from 479 College basketball teams that were classified as a Division I school (or equivalent) for at least one season from 1893 to 2019. The following categories (predictors) are from their website: 
-
-- Rank: Rank of School
-- School: Name of School
-- City: School location **(categorical predictor)**
-- State: School location **(categorical predictor)**
-- From: First year classified as Division I **(categorical predictor)**
-- To: Last year classified as Division I **(categorical predictor)**
-- Yrs: Number of years played
-- G: Total Games played
-- W: Total Games won
-- L: Total Games lost
-- W-L% Win-Loss percentage **(This will be our response variable)**
-- SRS: (Simple Rating System): A rating that takes into account average point differential and strength of schedule. The rating is denominated in points above/below average, where zero is average. Non-Division I games are excluded from the ratings
-- SOS: (Strength of Schedule): A rating of strength of schedule. The rating is denominated in points above/below average, where zero is average. Non-Division I games are excluded from the ratings.
-- AP:  Number of schools ranked in final AP poll (poll taken before the conclusion of the NCAA tournament)
-- CREG: Number of regular season conference championships won
-- CTRN: Number of conference tournament championships won
-- NCAA: Number of NCAA Tournament appearances
-- FF: Number of NCAA Final Four appearances
-- NC: Number of NCAA Tournament championships won
-
-### Background information on dataset:
-- https://www.sports-reference.com/cbb/schools/
-- The data shows schools and the number of seasons they have played, their wins, losses, win-loss ratio, SRS, SOS, and then how many times they appeared in certain championships, and whether they made it to the final 4, or if they won the championship.
-
-### Statement of personal interest:
-- We thought it would be interesting to see if you can make a semi-accurate prediction of a college schools performance, specifically Win-Loss percentage and Championship wins, based on some of the other given data in the dataset (Such as years/seasons played, total games played, Simple Rating System, and Strength Of Schedule).
+# Final Project
 
 
-### Evidence the data can be loaded into R.
+### Introduction
 
 
-```{r}
-library(readr)
-school_data = read_csv("SchoolData.csv")
-```
+### Methods
 
-```{r}
-nrow(school_data)
-```
 
-```{r}
-head(school_data)
-```
+### Results
+
+
+### Discussion
+
+
+### Appendix
+
 
