@@ -49,8 +49,6 @@ This is what we'll explore in this project. We will look at the data and see if 
 </div>
 
 
-
-
 The introduction section should relay what you are attempting to accomplish. It should provide enough background to your work such that a reader would not need to load your data to understand your report. Like the simulation project, you can assume the reader is familiar with the course concepts, but not your data. Some things to consider:
 
     What is this data? Where did it come from? What are the variables? Why is it interesting to you?
@@ -98,6 +96,7 @@ forward_BIC = step(start_model, scope = WL ~ State + From + To + Yrs + G + SRS +
 #forward_BIC
 
 modified_forward_BIC = lm(WL ~ I(SRS ^ 2) + SOS + I(To ^ 2) + From + Yrs + CTRN + I(AP ^ 2) + I(CREG ^ 2) + I(NC ^ 2), data = school_trn_data)
+
 ```
 
 ```{r}
@@ -173,7 +172,10 @@ The results section should contain numerical or graphical summaries of your resu
 ### Discussion
 The discussion section should contain discussion of your results. This should frame your results in the context of the data. How is your final model useful?
 
-- TODO: Write a good discussion
+- After analyzing the different variables, we came to the conclusion that the best model was using From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC as the predictors (some of them considering interactions). These variables give information including when a team started playing in the seasons, how long they have been playing, the strength of their schedule (how difficult the teams are they were playing), and even some of the results in championships (whether they won or lost). Using these variables we were able to create a model and create a graph that would show how close we could predict a teams Win Loss ration based on these predictors. Looking at the graph you can see that the predictions aren't perfect, but they can give a pretty good guess as to what a teams win loss ration will be. Just by looking at the graph you can see that with those predictors, it was able to guess within about 10% their win loss ratios. I feel like this is pretty good considering all the other models we looked at and how bad they seemed to be.
+
+- Also, we threw in a Fitted vs Residuals model and a QQ plot. Both of these had the best results with the model we selected after breaking it down to the best version. While it still could be up for consideration whether the assumptions are violated, it is definitely better than the other models we had analyzed. We were able to get the p-value of the shapiro test above 0.05 which also was a good reason for the decision "fail to reject".
+
 
 ### Appendix 
 
