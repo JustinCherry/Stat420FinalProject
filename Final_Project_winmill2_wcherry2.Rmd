@@ -17,7 +17,6 @@ So what if there was a way to predict this? What if we were able to analyze some
 
 This is what we'll explore in this project. We will look at the data and see if there's a way to accurately predict a team's performance.
 
-
 **The Data:**
 
 - For this project, we're going to use the dataset found at https://www.sports-reference.com/cbb/schools/  which includes data from 479 College basketball teams that were classified as a Division I school (or equivalent) for at least one season from 1893 to 2019. We've made slight alterations to the original dataset including renaming "W-L%" to just "WL" and separating "City,State" into "City" and "State".
@@ -45,13 +44,10 @@ This is what we'll explore in this project. We will look at the data and see if 
 - **NC:** Number of NCAA Tournament championships won
 </div>
 
-
 The introduction section should relay what you are attempting to accomplish. It should provide enough background to your work such that a reader would not need to load your data to understand your report. Like the simulation project, you can assume the reader is familiar with the course concepts, but not your data. Some things to consider:
 
     What is this data? Where did it come from? What are the variables? Why is it interesting to you?
     Why are you creating a model for this data? What is the goal of this model?
-    
-- TODO: Write a good explanation.
 
 ### Methods
 
@@ -123,10 +119,8 @@ diagnostics = function(model, pcol = 'dodgerblue', lcol = 'darkorange', alpha = 
 }
 ```
 
-
 ### Results
 The results section should contain numerical or graphical summaries of your results. You should report a final model you have chosen. There is not necessarily one, singular correct model, but certainly some methods and models are better than others in certain situations. You may use any methods we studied this semester to complete this task and provide evidence that your final choice of model is a good one.
-
 
 - The model we decided was best for our test was the model using From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC as the predictors (Also included below).
 
@@ -154,15 +148,12 @@ plot(act_vals ~ pred_vals,col = 'dodgerblue',
 abline(0,1, col = "darkorange")
 ```
 
-
-
 ### Discussion
 The discussion section should contain discussion of your results. This should frame your results in the context of the data. How is your final model useful?
 
 - After analyzing the different variables, we came to the conclusion that the best model was using From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC as the predictors (some of them considering interactions). These variables give information including when a team started playing in the seasons, how long they have been playing, the strength of their schedule (how difficult the teams are they were playing), and even some of the results in championships (whether they won or lost). Using these variables we were able to create a model and create a graph that would show how close we could predict a teams Win Loss ration based on these predictors. Looking at the graph you can see that the predictions aren't perfect, but they can give a pretty good guess as to what a teams win loss ration will be. Just by looking at the graph you can see that with those predictors, it was able to guess within about 10% their win loss ratios. I feel like this is pretty good considering all the other models we looked at and how bad they seemed to be.
 
 - Also, we threw in a Fitted vs Residuals model and a QQ plot. Both of these had the best results with the model we selected after breaking it down to the best version. While it still could be up for consideration whether the assumptions are violated, it is definitely better than the other models we had analyzed. We were able to get the p-value of the shapiro test above 0.05 which also was a good reason for the decision "fail to reject".
-
 
 ### Appendix 
 
@@ -195,9 +186,6 @@ big_mod_cd = cooks.distance(modified_forward_BIC)
 sum(big_mod_cd > 4 / length(modified_forward_BIC))
 ```
 
-
-
-
 ### Rubric - TODO: Remove before submission
 
 DUE: Sat, 8/3/2019
@@ -212,4 +200,3 @@ Discussion (15 pts): This section provides a full discussion of the results. It 
 RMarkdown Usage and Programming Efficacy (15 pts): The Rmd file performs the required tasks in an efficient method and is fully correct. The simulated data is created, read, and accessed according to best practices. The R and RMarkdown usage address the needs of the Methods section and produces what is displayed in the Results section. Does your code perform the desired task? Is your code readable?
 
 Neatness and Organization of the Report and Rmd files (15 pts): The Rmd file and Report are written and presented in a conventional style using appropriate spacing that is easy to read. The Report attempts to answer what was asked for in the directions and addressed in the Introduction. Plots are easily readable and self-explanatory. R output is limited to what is necessary to directly answer the exercise. Is your report easy to read? Is it written in a manner such that a reader does not already need to be familiar with the data?
-
