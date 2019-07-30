@@ -106,21 +106,6 @@ forward_BIC = step(start_model, scope = WL ~ From + To + Yrs + G + SRS + SOS + A
 
 ```
 
-
-```{r message=FALSE}
-plot_fitted_resid = function(model, pointcol = "dodgerblue", linecol = "darkorange") {
-  plot(fitted(model), resid(model), 
-       col = pointcol, pch = 20, cex = 1.5,
-       xlab = "Fitted", ylab = "Residuals")
-  abline(h = 0, col = linecol, lwd = 2)
-}
-
-plot_qq = function(model, pointcol = "dodgerblue", linecol = "darkorange") {
-  qqnorm(resid(model), col = pointcol, pch = 20, cex = 1.5)
-  qqline(resid(model), col = linecol, lwd = 2)
-}
-```
-
 ```{r}
 diagnostics = function(model, pcol = 'dodgerblue', lcol = 'darkorange', alpha = 0.05, plotit = TRUE, testit = TRUE)
 {
@@ -150,6 +135,29 @@ diagnostics = function(model, pcol = 'dodgerblue', lcol = 'darkorange', alpha = 
 diagnostics(significant_model)
 ```
 
+```{r}
+#influential points (leverage)
+big_mod_cd = cooks.distance(significant_model)
+sum(big_mod_cd > 4 / length(significant_model))
+```
+
+
+
+
+```{r message=FALSE}
+plot_fitted_resid = function(model, pointcol = "dodgerblue", linecol = "darkorange") {
+  plot(fitted(model), resid(model), 
+       col = pointcol, pch = 20, cex = 1.5,
+       xlab = "Fitted", ylab = "Residuals")
+  abline(h = 0, col = linecol, lwd = 2)
+}
+
+plot_qq = function(model, pointcol = "dodgerblue", linecol = "darkorange") {
+  qqnorm(resid(model), col = pointcol, pch = 20, cex = 1.5)
+  qqline(resid(model), col = linecol, lwd = 2)
+}
+```
+
 ```{r message=FALSE, eval=FALSE}
 plot_fitted_resid(significant_model)
 plot_qq(significant_model)
@@ -160,8 +168,6 @@ bptest(significant_model)
 shapiro.test(significant_model$residuals)
 
 ```
-
-
 ```{r message=FALSE}
 #anova(significant_model, full_model)
 
@@ -174,6 +180,9 @@ shapiro.test(significant_model$residuals)
 
 #anova(forward_BIC, full_model)
 ```
+
+
+
 
 
 - TODO: Look into using test and train data
