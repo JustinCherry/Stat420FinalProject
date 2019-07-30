@@ -13,6 +13,44 @@ urlcolor: cyan
 
 
 ### Introduction
+
+College basketball is a huge sport. Every season thousands of fans watch in anticipation as hundreds of schools compete face to face on the court for basketball glory. Every step along the way those fans are dying to know "how will our team do this season?" 
+
+So what if there was a way to predict this? What if we were able to analyze some statistics and form an accurate predition of how well a team would perform? We would be able to answer every fan's lingering question: "How will we do this season?"
+
+This is what we'll explore in this project. We will look at the data and see if there's a way to accurately predict a team's performance.
+
+
+**The Data:**
+
+- For this project, we're going to use the dataset found at https://www.sports-reference.com/cbb/schools/  which includes data from 479 College basketball teams that were classified as a Division I school (or equivalent) for at least one season from 1893 to 2019. We've made slight alterations to the original dataset including renaming "W-L%" to just "WL" and separating "City,State" into "city" and "state".
+
+**The Variables:**
+<div class="col3">
+- **Rank:** Rank of School
+- **School:** Name of School
+- **City:** School location (categorical predictor)
+- **State:** School location (categorical predictor)
+- **From:** First year classified as Division I (categorical predictor
+- **To:** Last year classified as Division I (categorical predictor)
+- **Yrs:** Number of years played
+- **G:** Total Games played
+- **W:** Total Games won
+- **L:** Total Games lost
+- **WL** Win-Loss percentage (This will be our response variable)
+- **SRS:** (Simple Rating System): A rating that takes into account average point differential and strength of schedule. The rating is denominated in points above/below average, where zero is average. 
+- **SOS:** (Strength of Schedule): A rating of strength of schedule. The rating is denominated in points above/below average, where zero is average. 
+- **AP:**  Number of schools ranked in final AP poll (poll taken before the conclusion of the NCAA tournament)
+- **CREG:** Number of regular season conference championships won
+- **CTRN:** Number of conference tournament championships won
+- **NCAA:** Number of NCAA Tournament appearances
+- **FF:** Number of NCAA Final Four appearances
+- **NC:** Number of NCAA Tournament championships won
+</div>
+
+
+
+
 The introduction section should relay what you are attempting to accomplish. It should provide enough background to your work such that a reader would not need to load your data to understand your report. Like the simulation project, you can assume the reader is familiar with the course concepts, but not your data. Some things to consider:
 
     What is this data? Where did it come from? What are the variables? Why is it interesting to you?
@@ -44,10 +82,15 @@ library(lmtest)
 schoolData = read_csv("SchoolData.csv")
 schoolData = na.omit(schoolData)
 
-full_model = lm(WL ~ . - (School + City + State), data = schoolData)
+set.seed(420)
+school_trn_idx  = sample(nrow(schoolData), size = trunc(0.80 * nrow(schoolData)))
+school_trn_data = schoolData[school_trn_idx, ]
+school_tst_data = schoolData[-school_trn_idx, ]
+
+full_model = lm(WL ~ . - (School + City + State), data = school_trn_data)
 #full_model
 
-significant_model = lm(WL ~ From + To + SRS + SOS + CTRN + NCAA, data = schoolData)
+significant_model = lm(WL ~ From + To + SRS + SOS + CTRN + NCAA, data = school_trn_data)
 #significant_model
 
 backward_AIC = step(full_model, direction = "backward", trace = 0)
@@ -57,7 +100,7 @@ n = length(full_model$residuals)
 backward_BIC = step(full_model, direction = "backward", k = log(n), trace = 0)
 #backward_BIC
 
-start_model = lm(WL ~ 1, data = schoolData)
+start_model = lm(WL ~ 1, data = school_trn_data)
 forward_BIC = step(start_model, scope = WL ~ From + To + Yrs + G + SRS + SOS + AP + CREG + CTRN + NCAA + FF + NC, direction = "forward", trace = 0)
 #forward_BIC
 
@@ -78,8 +121,36 @@ plot_qq = function(model, pointcol = "dodgerblue", linecol = "darkorange") {
 }
 ```
 
+```{r}
+diagnostics = function(model, pcol = 'dodgerblue', lcol = 'darkorange', alpha = 0.05, plotit = TRUE, testit = TRUE)
+{
+  if(plotit == TRUE)
+  {
+    par(mfrow = c(1, 2))
+    plot(fitted(model), resid(model), 
+         col = pcol, 
+         xlab = "Fitted", 
+         ylab = "Residuals", 
+         main = "Fitted vs Residuals Plot")
+    abline(h = 0, col = lcol)
+    
+    qqnorm(resid(model), col = pcol, main = "QQ Plot")
+    qqline(resid(model), col = lcol)
+  }
+  
+  if(testit == TRUE)
+  {
+    p_val = shapiro.test(resid(model))$p.value
+    decision = ifelse(p_val < alpha, "Reject", "Fail to Reject")
+    list(p_val = p_val, decision = decision)
+  }
+  
+}
 
-```{r message=FALSE}
+diagnostics(significant_model)
+```
+
+```{r message=FALSE, eval=FALSE}
 plot_fitted_resid(significant_model)
 plot_qq(significant_model)
 
@@ -145,7 +216,16 @@ The discussion section should contain discussion of your results. This should fr
 
 - TODO: Write a good discussion
 
-### Appendix - TODO: REMOVE IF NOT USED
+### Appendix 
+
+<style>
+  .col3 {
+    columns: 3 100px;
+    -webkit-columns: 3 100px;
+    -moz-columns: 3 100px;
+  }
+</style>
+
 The appendix section should contain code and analysis that is used, but that may clutter the report or is not directly related to the choice of mode
 
 - TODO: EXTRA CRAP IF ANY
