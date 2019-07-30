@@ -9,9 +9,6 @@ output:
 urlcolor: cyan
 ---
 
-# Final Project
-
-
 ### Introduction
 
 College basketball is a huge sport. Every season thousands of fans watch in anticipation as hundreds of schools compete face to face on the court for basketball glory. Every step along the way those fans are dying to know "how will our team do this season?" 
@@ -124,12 +121,26 @@ diagnostics = function(model, pcol = 'dodgerblue', lcol = 'darkorange', alpha = 
   }
   
 }
-diagnostics(modified_forward_BIC)
 ```
 
 
+### Results
+The results section should contain numerical or graphical summaries of your results. You should report a final model you have chosen. There is not necessarily one, singular correct model, but certainly some methods and models are better than others in certain situations. You may use any methods we studied this semester to complete this task and provide evidence that your final choice of model is a good one.
 
 
+- The model we decided was best for our test was the model using From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC as the predictors (Also included below).
+
+```{r}
+modified_forward_BIC = lm(WL ~ I(SRS ^ 2) + SOS + I(To ^ 2) + From + Yrs + CTRN + I(AP ^ 2) + I(CREG ^ 2) + I(NC ^ 2), data = school_trn_data)
+```
+
+- Below you can see the results of some of the tests we performed.
+
+```{r}
+diagnostics(modified_forward_BIC)
+```
+
+- Also, we compared the predicted vs actual data points to see how accurate/well our model did.
 
 ```{r}
 pred_vals = predict(modified_forward_BIC, newdata = school_tst_data)
@@ -143,30 +154,6 @@ plot(act_vals ~ pred_vals,col = 'dodgerblue',
 abline(0,1, col = "darkorange")
 ```
 
-
-
-- TODO: Test model
-
-- TODO: Anova to show model we are using is best ----- DID SOME WORK
-
-- TODO: Check residuals/outliers/how much leverage
-
-- TODO: LOOK AT BELOW OPTIONS
-- The null hypothesis of the test
-- The test statistic of the test
-- The p-value of the test
-- A statistical decision
-- A practical conclusion
-
-### Results
-The results section should contain numerical or graphical summaries of your results. You should report a final model you have chosen. There is not necessarily one, singular correct model, but certainly some methods and models are better than others in certain situations. You may use any methods we studied this semester to complete this task and provide evidence that your final choice of model is a good one.
-
-
-- The model we decided was best for our test was the model using From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC as the predictors (Also included below).
-
-```{r}
-modified_forward_BIC = lm(WL ~ I(SRS ^ 2) + SOS + I(To ^ 2) + From + Yrs + CTRN + I(AP ^ 2) + I(CREG ^ 2) + I(NC ^ 2), data = school_trn_data)
-```
 
 
 ### Discussion
