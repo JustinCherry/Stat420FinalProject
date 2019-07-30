@@ -40,33 +40,86 @@ Your task is not to use as many methods as possible. Your task is to use appropr
 
 ```{r message=FALSE}
 library(readr)
+library(lmtest)
 schoolData = read_csv("SchoolData.csv")
+schoolData = na.omit(schoolData)
 
 full_model = lm(WL ~ . - (School + City + State), data = schoolData)
-summary(full_model)
+#full_model
 
 significant_model = lm(WL ~ From + To + SRS + SOS + CTRN + NCAA, data = schoolData)
-significant_model
+#significant_model
 
-backwards_AIC = step(full_model, direction = "backward", trace = 0)
-backwards_AIC
+backward_AIC = step(full_model, direction = "backward", trace = 0)
+#backward_AIC
+
+n = length(full_model$residuals)
+backward_BIC = step(full_model, direction = "backward", k = log(n), trace = 0)
+#backward_BIC
+
+start_model = lm(WL ~ 1, data = schoolData)
+forward_BIC = step(start_model, scope = WL ~ From + To + Yrs + G + SRS + SOS + AP + CREG + CTRN + NCAA + FF + NC, direction = "forward", trace = 0)
+#forward_BIC
+
 ```
+
+
+```{r message=FALSE}
+plot_fitted_resid = function(model, pointcol = "dodgerblue", linecol = "darkorange") {
+  plot(fitted(model), resid(model), 
+       col = pointcol, pch = 20, cex = 1.5,
+       xlab = "Fitted", ylab = "Residuals")
+  abline(h = 0, col = linecol, lwd = 2)
+}
+
+plot_qq = function(model, pointcol = "dodgerblue", linecol = "darkorange") {
+  qqnorm(resid(model), col = pointcol, pch = 20, cex = 1.5)
+  qqline(resid(model), col = linecol, lwd = 2)
+}
+```
+
+
+```{r message=FALSE}
+plot_fitted_resid(significant_model)
+plot_qq(significant_model)
+
+### BP TEST WE WANT A LARGE P-VALUE (NO violation with the constant variance assumption)
+bptest(significant_model)
+### SHAPIRO TEST WE WANT A LARGE P-VALUE (NO violation with the normality assumption)
+shapiro.test(significant_model$residuals)
+
+```
+
+
+```{r message=FALSE}
+#anova(significant_model, full_model)
+
+#### THIS ONE IS GOOD, but it includes G and L... Which you can deduce Win/Loss ratio from it.
+#anova(backward_AIC, full_model)
+
+#anova(significant_model, backward_AIC)
+
+#anova(backward_BIC, forward_BIC)
+
+#anova(forward_BIC, full_model)
+```
+
 
 - TODO: Look into using test and train data
 
-- TODO: Calculate Standard Error
+- TODO: Calculate Standard Error ----- Provided????
 
-- TODO: Fit FULL model
+- TODO: Fit FULL model ----- DID SOME WORK
 
-- TODO: Run AIC and BIC tests to find best model
+- TODO: Run AIC and BIC tests to find best model ----- DID SOME WORK
 
-- TODO: Fit the model
+- TODO: Fit the model ----- DID SOME WORK
 
-- TODO: Run Diagnostics on model (Shapiro and Other)
+- TODO: Run Diagnostics on model (Shapiro and Other) ----- DID SOME WORK
 
 - TODO: Test model
 
-- TODO: Anova to show model we are using is best
+- TODO: Anova to show model we are using is best ----- DID SOME WORK
 
 - TODO: Check residuals/outliers/how much leverage
 
