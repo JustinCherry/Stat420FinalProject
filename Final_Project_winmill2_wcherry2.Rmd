@@ -129,11 +129,23 @@ diagnostics = function(model, pcol = 'dodgerblue', lcol = 'darkorange', alpha = 
 diagnostics(modified_forward_BIC)
 ```
 
+
+
+
+
 ```{r}
-#influential points (leverage)
-big_mod_cd = cooks.distance(modified_forward_BIC)
-sum(big_mod_cd > 4 / length(modified_forward_BIC))
+pred_vals = predict(modified_forward_BIC, newdata = school_tst_data)
+act_vals = school_tst_data$WL
+
+avg_percent_error = mean((abs(pred_vals -act_vals))/pred_vals)*100
+
+plot(act_vals ~ pred_vals,col = 'dodgerblue',
+     xlab = "Predicted Values",
+     ylab = "Actual Values")
+abline(0,1, col = "darkorange")
 ```
+
+
 
 - TODO: Test model
 
@@ -187,6 +199,11 @@ backward_AIC = step(full_model, direction = "backward", trace = 0)
 
 n = length(full_model$residuals)
 backward_BIC = step(full_model, direction = "backward", k = log(n), trace = 0)
+
+#This was useful when determining our final model, but not useful as a test afterward. We chose to include here for reference.
+#influential points
+big_mod_cd = cooks.distance(modified_forward_BIC)
+sum(big_mod_cd > 4 / length(modified_forward_BIC))
 ```
 
 
