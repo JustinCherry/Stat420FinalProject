@@ -98,7 +98,6 @@ forward_BIC = step(start_model, scope = WL ~ State + From + To + Yrs + G + SRS +
 #forward_BIC
 
 modified_forward_BIC = lm(WL ~ I(SRS ^ 2) + SOS + I(To ^ 2) + From + Yrs + CTRN + I(AP ^ 2) + I(CREG ^ 2) + I(NC ^ 2), data = school_trn_data)
-
 ```
 
 ```{r}
@@ -127,14 +126,13 @@ diagnostics = function(model, pcol = 'dodgerblue', lcol = 'darkorange', alpha = 
   
 }
 
-### SHAPIRO TEST WE WANT A LARGE P-VALUE (NO violation with the normality assumption)
-### BP TEST WE WANT A LARGE P-VALUE (NO violation with the constant variance assumption)
 diagnostics(modified_forward_BIC)
 ```
 
-
-```{r message=FALSE}
-anova(null_model, modified_forward_BIC)
+```{r}
+#influential points (leverage)
+big_mod_cd = cooks.distance(modified_forward_BIC)
+sum(big_mod_cd > 4 / length(modified_forward_BIC))
 ```
 
 - TODO: Test model
