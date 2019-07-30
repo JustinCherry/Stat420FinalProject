@@ -18,9 +18,19 @@ urlcolor: cyan
 
 ### Methods
 
-```{r}
+```{r message=FALSE}
 library(readr)
 schoolData = read_csv("SchoolData.csv")
+
+full_model = lm(WL ~ . - (School + City + State), data = schoolData)
+summary(full_model)
+
+significant_model = lm(WL ~ From + To + SRS + SOS + CTRN + NCAA, data = schoolData)
+significant_model
+
+backwards_AIC = step(full_model, direction = "backward", trace = 0)
+backwards_AIC
+
 ```
 
 - TODO: Look into using test and train data
