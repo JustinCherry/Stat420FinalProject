@@ -519,7 +519,7 @@ abline(0,1, col = &quot;darkorange&quot;)</code></pre>
 <li><p>This graph above is very generic… So we wanted to show more personalized results.</p></li>
 <li><p>Say someone going to Brigham Young University (Provo) wanted to see a prediction for about how well (What will be their Win-Loss ratio) the Cougars will do in a season. Having the following information - SRS = 7.56, SOS = 3.54, To = 2019, From = 1903, Yrs = 117, CTRN = 3, AP = 10, CREG = 25, NC = 0… We could make a prediction for what their Win-Loss ratio will be.</p></li>
 </ul>
-<pre class="r"><code>prediction = data.frame(SRS = 7.56,
+<pre class="r"><code>cougar_prediction = data.frame(SRS = 7.56,
                         SOS = 3.54,
                         To = 2019,
                         From = 1903,
@@ -529,7 +529,7 @@ abline(0,1, col = &quot;darkorange&quot;)</code></pre>
                         CREG = 25,
                         NC = 0
                         )
-predicted = predict(modified_forward_BIC, newdata = prediction)
+predicted = predict(modified_forward_BIC, newdata = cougar_prediction)
 actual = schoolData[35, 11]</code></pre>
 <ul>
 <li>As you can see, with that information the predicted Win-Loss ration was 0.5548297 and the actual Win-Loss ratio was 0.626. The prediction was off by 0.0711703 which is pretty close. The Cougar fan would then know that their team will probably win a little more than half of their games.</li>
