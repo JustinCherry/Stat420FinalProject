@@ -19,7 +19,7 @@ This is what we'll explore in this project. We will look at the data and see if 
 
 **The Data:**
 
-- For this project, we're going to use the dataset found at https://www.sports-reference.com/cbb/schools/  which includes data from 479 College basketball teams that were classified as a Division I school (or equivalent) for at least one season from 1893 to 2019. We've made slight alterations to the original dataset including renaming "W-L%" to just "WL" and separating "City,State" into "City" and "State".
+- For this project, we're going to use the dataset found at https://www.sports-reference.com/cbb/schools/  which includes data from 479 College basketball teams that were classified as a Division I school (or equivalent) for at least one season from 1893 to 2019. 
 
 **The Variables:**
 <div class="col3">
@@ -47,48 +47,46 @@ This is what we'll explore in this project. We will look at the data and see if 
 
 ### Methods
 
-The methods section should contain the bulk of your “work.” This section will contain the bulk of the R code that is used to generate the results. Your R code is not expected to be perfect idiomatic R, but it is expected to be understood by a reader without too much effort. Use RMarkdown and code comments to your advantage to explain your code if needed.
+**Data Preparation:**
 
-This section should contain any information about data preparation that is performed to the original data before modelling. Then you will apply methods seen in class, which may include some of the following but are not limited to:
+- We've made slight alterations to the original dataset including:
 
-    Multiple linear regression
-    ANOVA
-    Dummy variables
-    Interaction
-    Residual diagnostics
-    Outlier diagnostics
-    Transformations
-    Polynomial regression
-    Model selection
-
-Your task is not to use as many methods as possible. Your task is to use appropriate methods to find a good model that can correctly answer a question about the dataset, and then to communicate your result effectively.
-
+  - renaming "W-L%" to just "WL". The '%' was interfering with the r code.  
+  - separating "City,State" into "City" and "State". We wanted to be able to use city and state separately in our model.
+  - converting "state" into a factor. This was one of our categorical variables, so we needed the factor.
+  
 ```{r message=FALSE}
 library(readr)
 library(lmtest)
 schoolData = read_csv("SchoolData.csv")
+#remove null values
 schoolData = na.omit(schoolData)
+#convert state into factor
 schoolData$State = as.factor(schoolData$State)
-#schoolData
 
+#separate dataset into train and test data
 set.seed(420)
 school_trn_idx  = sample(nrow(schoolData), size = trunc(0.80 * nrow(schoolData)))
 school_trn_data = schoolData[school_trn_idx, ]
 school_tst_data = schoolData[-school_trn_idx, ]
 
+#decide on a good model
 null_model = lm(WL ~ 1, data = school_trn_data)
 
 full_model = lm(WL ~ . - (School + City), data = school_trn_data)
 
 start_model = lm(WL ~ 1, data = school_trn_data)
-forward_BIC = step(start_model, scope = WL ~ State + From + To + Yrs + G + SRS + SOS + AP + CREG + CTRN + NCAA + FF + NC, direction = "forward", trace = 0)
-#forward_BIC
 
+#forward_BIC
+forward_BIC = step(start_model, scope = WL ~ State + From + To + Yrs + G + SRS + SOS + AP + CREG + CTRN + NCAA + FF + NC, direction = "forward", trace = 0)
+
+#pretty good, but needs adjustment
 modified_forward_BIC = lm(WL ~ I(SRS ^ 2) + SOS + I(To ^ 2) + From + Yrs + CTRN + I(AP ^ 2) + I(CREG ^ 2) + I(NC ^ 2), data = school_trn_data)
 
 ```
 
 ```{r}
+#function to test diagnostics of a given model including Shapiro test and normal variance and qq plots
 diagnostics = function(model, pcol = 'dodgerblue', lcol = 'darkorange', alpha = 0.05, plotit = TRUE, testit = TRUE)
 {
   if(plotit == TRUE)
