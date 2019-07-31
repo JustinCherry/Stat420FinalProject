@@ -118,7 +118,7 @@ diagnostics = function(model, pcol = 'dodgerblue', lcol = 'darkorange', alpha = 
 ### Results
 The results section should contain numerical or graphical summaries of your results. You should report a final model you have chosen. There is not necessarily one, singular correct model, but certainly some methods and models are better than others in certain situations. You may use any methods we studied this semester to complete this task and provide evidence that your final choice of model is a good one.
 
-- The model we decided was best for our test was the model using From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC as the predictors (Also included below).
+- The model we decided was best for our test was the model using From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC as the predictors (Also included below). 
 
 ```{r}
 modified_forward_BIC = lm(WL ~ I(SRS ^ 2) + SOS + I(To ^ 2) + From + Yrs + CTRN + I(AP ^ 2) + I(CREG ^ 2) + I(NC ^ 2), data = school_trn_data)
@@ -143,6 +143,28 @@ plot(act_vals ~ pred_vals,col = 'dodgerblue',
      ylab = "Actual Values")
 abline(0,1, col = "darkorange")
 ```
+
+- This graph above is very generic... So we wanted to show more personalized results. 
+
+- Say someone going to Brigham Young University (Provo) wanted to see a prediction for about how well (What will be their Win-Loss ratio) the Cougars will do in a season. Having the following information - SRS = 7.56, SOS = 3.54, To = 2019, From = 1903, Yrs = 117, CTRN = 3, AP = 10, CREG = 25, NC = 0... We could make a prediction for what their Win-Loss ratio will be.
+
+```{r}
+prediction = data.frame(SRS = 7.56,
+                        SOS = 3.54,
+                        To = 2019,
+                        From = 1903,
+                        Yrs = 117,
+                        CTRN = 3,
+                        AP = 10,
+                        CREG = 25,
+                        NC = 0
+                        )
+predicted = predict(modified_forward_BIC, newdata = prediction)
+actual = schoolData[35, 11]
+```
+
+- As you can see, with that information the predicted Win-Loss ration was `r predicted` and the actual Win-Loss ratio was `r actual`. The prediction was off by `r actual-predicted` which is pretty close. The Cougar fan would then know that their team will probably win a little more than half of their games.
+
 
 ### Discussion
 The discussion section should contain discussion of your results. This should frame your results in the context of the data. How is your final model useful?
