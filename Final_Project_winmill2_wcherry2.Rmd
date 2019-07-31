@@ -116,7 +116,7 @@ diagnostics = function(model, pcol = 'dodgerblue', lcol = 'darkorange', alpha = 
 ### Results
 The results section should contain numerical or graphical summaries of your results. You should report a final model you have chosen. There is not necessarily one, singular correct model, but certainly some methods and models are better than others in certain situations. You may use any methods we studied this semester to complete this task and provide evidence that your final choice of model is a good one.
 
-- The model we decided was best for our test was the model using From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC as the predictors (Also included below). 
+- The model we decided was best for our test was the model using the predictors - From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC (Code for model included below). We started off with the full_model. With the full_model we performed a backwards AIC and BIC. However, in both of these results was chosen the predictors G and L... Knowing what those are (Games played and Loses), you would be able to calculate exactly what the Win-Loss ratio would be. We figured that this was probably not the best model to choose because it would make it so that we couldn't figure out if the other predictors were useful or not in determining Win-Loss ratio. We decided not to use either G or L, and that is why we decided to perform a forward BIC. We started from a null_model, and then made it so that its scope was all of the predictors except a few... two of those being W or L (Wins or Losses). We did this to make sure neither of those were selected as predictors. We then ran the forward BIC and got better model. However, it still wasn't where we wanted it. So we decided to throw in some interactions to see if we could get better results in the Fitted vs Residuals plot, the QQ plot, and the Shapiro test. After making some modifications, we ended up with the below model that we were pleased with.
 
 ```{r}
 modified_forward_BIC = lm(WL ~ I(SRS ^ 2) + SOS + I(To ^ 2) + From + Yrs + CTRN + I(AP ^ 2) + I(CREG ^ 2) + I(NC ^ 2), data = school_trn_data)
@@ -142,9 +142,9 @@ plot(act_vals ~ pred_vals,col = 'dodgerblue',
 abline(0,1, col = "darkorange")
 ```
 
-- This graph above is very generic... So we wanted to show more personalized results. 
+- The graph above is very generic... So we wanted to show more personalized results. 
 
-- Say someone going to Brigham Young University (Provo) wanted to see a prediction for about how well (What will be their Win-Loss ratio) the Cougars will do in a season. Having the following information - SRS = 7.56, SOS = 3.54, To = 2019, From = 1903, Yrs = 117, CTRN = 3, AP = 10, CREG = 25, NC = 0... We could make a prediction for what their Win-Loss ratio will be using our model.
+- Say someone going to Brigham Young University (Provo - close to where we are from) wanted to see a prediction for about how well the Cougars will do in a season. Having the following information - SRS = 7.56, SOS = 3.54, To = 2019, From = 1903, Yrs = 117, CTRN = 3, AP = 10, CREG = 25, NC = 0... We could make a prediction for what their Win-Loss ratio will be using our model.
 
 ```{r}
 cougar_prediction = data.frame(SRS = 7.56,
@@ -161,8 +161,28 @@ predicted = predict(modified_forward_BIC, newdata = cougar_prediction)
 actual = schoolData[35, 11]
 ```
 
-- As you can see, with that information the predicted Win-Loss ration was `r predicted` and the actual Win-Loss ratio was `r actual`. The prediction was off by `r actual-predicted` which is `r (actual-predicted)*100`%... That is pretty close. The Cougar fan would then know that their team will probably win a little more than half of their games.
+- As you can see, with that information the predicted Win-Loss ratio was `r predicted` and the actual Win-Loss ratio was `r actual`. The prediction was off by `r actual-predicted` which is `r format(round((actual-predicted)*100, 2), nsmall = 2)`%... That is pretty close. The Cougar fan would then know that their team will probably win a little more than half of their games.
 
+- Another example: The University of Illinois.
+
+- Using their data - SRS = 12.76, SOS = 7.65, To = 2019, From = 1906, Yrs = 114, CTRN = 2, AP = 26, CREG = 17, NC = 0
+
+```{r}
+illiniwek_prediction = data.frame(SRS = 12.76,
+                        SOS = 7.65,
+                        To = 2019,
+                        From = 1906,
+                        Yrs = 114,
+                        CTRN = 2,
+                        AP = 26,
+                        CREG = 17,
+                        NC = 0
+                        )
+predicted = predict(modified_forward_BIC, newdata = illiniwek_prediction)
+actual = schoolData[133, 11]
+```
+
+- With that information the predicted Win-Loss ratio was `r predicted` and the actual Win-Loss ratio was `r actual`. The prediction was off by `r actual-predicted` which is `r format(round((actual-predicted)*100, 2), nsmall = 2)`%... Again, that is pretty close and is within 10%. The Illinois fan would then know that their team has a good chance to win a little more than half of their games as well.
 
 ### Discussion
 The discussion section should contain discussion of your results. This should frame your results in the context of the data. How is your final model useful?
