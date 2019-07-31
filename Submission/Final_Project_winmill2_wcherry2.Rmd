@@ -1,0 +1,268 @@
+---
+title: "College Basketball School Performance"
+author: "Bryan Winmill - winmill2 AND Justin Cherry - wcherry2 - Final Project"
+date: "7/17/2019"
+output:
+  html_document: 
+    toc: yes
+  pdf_document: default
+urlcolor: cyan
+---
+
+### Introduction
+
+College basketball is a huge sport. Every season thousands of fans watch in anticipation as hundreds of schools compete face to face on the court for basketball glory. Every step along the way those fans are dying to know "how will our team do this season?" 
+
+So what if there was a way to predict this? What if we were able to analyze some statistics and form an accurate predition of how well a team would perform? We would be able to answer every fan's lingering question: "How will we do this season?"
+
+This is what we'll explore in this project. We will look at the data and see if there's a way to accurately predict a team's performance given some information.
+
+**The Data:**
+
+- For this project, we're going to use the dataset found at https://www.sports-reference.com/cbb/schools/  which includes data from 479 College basketball teams that were classified as a Division I school (or equivalent) for at least one season from 1893 to 2019. 
+
+**The Variables:**
+<div class="col3">
+- **Rank:** Rank of School
+- **School:** Name of School
+- **City:** School location 
+- **State:** School location (categorical predictor)
+- **From:** First year classified as Division I (categorical predictor
+- **To:** Last year classified as Division I (categorical predictor)
+- **Yrs:** Number of years played
+- **G:** Total Games played
+- **W:** Total Games won
+- **L:** Total Games lost
+- **WL** Win-Loss percentage (This will be our response variable)
+- **SRS:** (Simple Rating System): A rating that takes into account average point differential and strength of schedule. The rating is denominated in points above/below average, where zero is average. 
+- **SOS:** (Strength of Schedule): A rating of strength of schedule. The rating is denominated in points above/below average, where zero is average. 
+- **AP:**  Number of schools ranked in final AP poll (poll taken before the conclusion of the NCAA tournament)
+- **CREG:** Number of regular season conference championships won
+- **CTRN:** Number of conference tournament championships won
+- **NCAA:** Number of NCAA Tournament appearances
+- **FF:** Number of NCAA Final Four appearances
+- **NC:** Number of NCAA Tournament championships won
+</div>
+
+
+### Methods
+
+**Data Preparation:**
+
+- We've made slight alterations to the original dataset including:
+
+  - renaming "W-L%" to just "WL". The '%' was interfering with the r code.  
+  - separating "City,State" into "City" and "State". We wanted to be able to use state separately in our model.
+  - removing any rows that introduced null values.
+  - converting "state" into a factor as this was one of our categorical variables.
+  
+**Importing and cleaning the data, and then analyzing to fit the best model**
+```{r message=FALSE}
+library(readr)
+library(lmtest)
+library("knitr")
+schoolData = read_csv("SchoolData.csv")
+#remove null values
+schoolData = na.omit(schoolData)
+#convert state into factor
+schoolData$State = as.factor(schoolData$State)
+
+#separate dataset into train and test data
+set.seed(420)
+school_trn_idx  = sample(nrow(schoolData), size = trunc(0.80 * nrow(schoolData)))
+school_trn_data = schoolData[school_trn_idx, ]
+school_tst_data = schoolData[-school_trn_idx, ]
+
+#decide on a good model
+null_model = lm(WL ~ 1, data = school_trn_data)
+
+full_model = lm(WL ~ . - (School + City), data = school_trn_data)
+
+start_model = lm(WL ~ 1, data = school_trn_data)
+
+#forward_BIC
+forward_BIC = step(start_model, scope = WL ~ State + From + To + Yrs + G + SRS + SOS + AP + CREG + CTRN + NCAA + FF + NC, direction = "forward", trace = 0)
+
+#pretty good, but needs adjustment
+modified_forward_BIC = lm(WL ~ I(SRS ^ 2) + SOS + I(To ^ 2) + From + Yrs + CTRN + I(AP ^ 2) + I(CREG ^ 2) + I(NC ^ 2), data = school_trn_data)
+
+```
+
+**A function to perform some tests to see how well our model is fit**
+```{r}
+#function to test diagnostics of a given model including Shapiro test and normal variance and qq plots
+diagnostics = function(model, pcol = 'dodgerblue', lcol = 'darkorange', alpha = 0.05, plotit = TRUE, testit = TRUE)
+{
+  if(plotit == TRUE)
+  {
+    par(mfrow = c(1, 2))
+    plot(fitted(model), resid(model), 
+         col = pcol, 
+         xlab = "Fitted", 
+         ylab = "Residuals", 
+         main = "Fitted vs Residuals Plot")
+    abline(h = 0, col = lcol)
+    
+    qqnorm(resid(model), col = pcol, main = "QQ Plot")
+    qqline(resid(model), col = lcol)
+  }
+  
+  if(testit == TRUE)
+  {
+    p_val = shapiro.test(resid(model))$p.value
+    decision = ifelse(p_val < alpha, "Reject", "Fail to Reject")
+    list(p_val = p_val, decision = decision)
+  }
+  
+}
+```
+
+**A function to predict/collect data and display it in a clean way**
+```{r}
+#function to create a good looking table to display statistics for a certain team
+showTable = function(model, data, row)
+{
+  predicted = predict(model, newdata = data)
+  actual = schoolData[row, 11]
+
+  winLoss = rbind(c("Predicted", predicted, format(round((predicted)*100, 2), nsmall = 2)), c("Actual", actual,      format(round((actual)*100, 2), nsmall = 2)))
+
+  table = kable(winLoss, format = "markdown", col.names = c("", "Ratio", "Percentage"))
+  
+  output = list("predicted" = predicted, "actual" = actual, "table" = table)
+  
+  return(output)
+}
+```
+
+
+### Results
+
+- The model we decided was best for our test was the model using the predictors - From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC (Code for model included below). 
+
+```{r}
+modified_forward_BIC = lm(WL ~ I(SRS ^ 2) + SOS + I(To ^ 2) + From + Yrs + CTRN + I(AP ^ 2) + I(CREG ^ 2) + I(NC ^ 2), data = school_trn_data)
+```
+
+**Building the Model:**
+
+- We started off with the full_model and performed a backwards AIC and BIC. However, we quickly realized that the predictors W and L(Wins and Loses) were determining our response perfectly, since W/L = WL. We figured that this was not a good model because it wouldn't allow us to know if other predictors were useful or not in determining win-loss ratio, So we decided not to use either G (Games Played) or L.
+
+- With that in mind, we decided to perform a forward BIC. We started from a null_model, with the scope of all predictors minus W and L (Wins and Losses). This provided better results, but it still wasn't where we wanted it. 
+
+- So we decided to throw in some interactions to see if we could get better results in the Fitted vs Residuals plot, the QQ plot, and the Shapiro test. After making some modifications, we ended up with the final model that we were pleased with (It ended up not needed W, L, or G in order to get a good model).
+
+**Testing the Model:**
+
+- Below you can see the results of tests we performed. In the diagnostics function, we create a Fitted vs Residuals Plot, a QQ plot, and then we do a Shapiro test and make a decision based on the p-value returned. This diagnostic function was very useful in order for us to keep improving the model.
+
+```{r}
+diagnostics(modified_forward_BIC)
+```
+
+**Model Accuracy**
+
+- Once we had an acceptable model, we wanted to see how accurate it was. For that, we had split the original dataset for 80% train data (for building the model) and 20% test data (for testing). 
+
+- We then compared the predicted values from using the model to actual data points from the test data to see how accurate our model was. We've plotted the results below.
+
+```{r}
+pred_vals = predict(modified_forward_BIC, newdata = school_tst_data)
+act_vals = school_tst_data$WL
+
+avg_percent_error = mean((abs(pred_vals -act_vals))/pred_vals)*100
+
+plot(act_vals ~ pred_vals,col = 'dodgerblue',
+     xlab = "Predicted Values",
+     ylab = "Actual Values")
+abline(0,1, col = "darkorange")
+```
+
+
+**Specific Predictions:**
+
+- The graph above is very generic, so we wanted to show more personalized results (For any team specific fans). 
+
+- **Prediction for Brigham Young University**
+
+  - Since we're close to Brigham Young University, we wanted to see a prediction for about how well the Cougars will do in a season. Using data from the original dataset for the predictors, we could make a prediction for what BYU's win-loss ratio will be using our model.
+```{r}
+cougar_prediction = data.frame(SRS = 7.56, SOS = 3.54, To = 2019, From = 1903, Yrs = 117, CTRN = 3, AP = 10, CREG = 25, NC = 0)
+
+cougars = showTable(modified_forward_BIC, cougar_prediction, 35)
+cougars$table
+```
+
+-
+
+  - You can see the predicted win-loss ratio was only off by `r format(round((cougars$actual-cougars$predicted)*100, 2), nsmall = 2)`%. That is pretty close. The Cougar fan would then know that their team will probably win a little more than half of their games.
+
+
+
+- **Prediction for The University of Illinois**
+
+  - Another example using the data from The University of Illinois: 
+
+```{r}
+illiniwek_prediction = data.frame(SRS = 12.76, SOS = 7.65, To = 2019, From = 1906, Yrs = 114, CTRN = 2, AP = 26, CREG = 17, NC = 0)
+
+illiniweks = showTable(modified_forward_BIC, illiniwek_prediction, 133)
+illiniweks$table
+```
+
+- With that information the prediction was off by `r format(round((illiniweks$actual-illiniweks$predicted)*100, 2), nsmall = 2)`%. Again, that is pretty close and is within 10%. The Illinois fan would then know that their team has a good chance to win a little more than half of their games as well.
+
+- **A Final Prediction**
+
+  - For this one, we just wanted to show a prediction that was very close. We chose information from Boston University.
+
+```{r}
+other_prediction = data.frame(SRS = -6.84, SOS = -5.48, To = 2019, From = 1916, Yrs = 93, CTRN = 6, AP = 0, CREG = 8,NC = 0)
+
+another = showTable(modified_forward_BIC, other_prediction, 32)
+another$table
+```
+
+- With this final information, the prediction was off by `r format(round((another$predicted-another$actual)*100, 2), nsmall = 2)`%. 
+
+- So you can see that while these predictions vary between really close and about 10% off, they are fairly consistent and can give a pretty good estimate as to what a team's win-loss ratio will be.
+
+### Discussion
+
+- After analyzing the different variables, we came to the conclusion that the best model was using variables that give information including when a team started playing, how long they have been playing, the strength of their schedule (how difficult the teams are they were playing), and a count of championships won. 
+
+- Using these variables we were able to create a model and graph that would show how close we could predict a team's win-loss ratio. 
+
+- Looking at the graph you can see that the predictions aren't perfect, but they give a decent prediction (within about 10%) of win-loss ratios, all things considered. 
+
+
+- In conclusion, college basketball fans now have a way of predicting how their team will perform given the right information. Fans can now plug in their school's From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC information and get back a prediction that will be within 10% of their performance ratio. 
+
+### Appendix 
+
+<style>
+  .col3 {
+    columns: 3 100px;
+    -webkit-columns: 3 100px;
+    -moz-columns: 3 100px;
+  }
+</style>
+
+```{r, eval = FALSE}
+
+# These are some models we tested with, but after using the diagnostics and anova, we found that they were not very good models.
+
+full_model = lm(WL ~ . - (School + City), data = school_trn_data)
+
+significant_model = lm(WL ~ To + SRS + SOS + AP + NCAA, data = school_trn_data)
+
+backward_AIC = step(full_model, direction = "backward", trace = 0)
+
+n = length(full_model$residuals)
+backward_BIC = step(full_model, direction = "backward", k = log(n), trace = 0)
+
+#This was useful when determining our final model, but not useful as a test afterward. We chose to include here for reference.
+#influential points
+big_mod_cd = cooks.distance(modified_forward_BIC)
+sum(big_mod_cd > 4 / length(modified_forward_BIC))
+```

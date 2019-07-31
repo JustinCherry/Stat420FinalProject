@@ -1,6 +1,6 @@
 ---
-title: "Final Project"
-author: "Bryan Winmill - winmill2 AND Justin Cherry - wcherry2"
+title: "College Basketball School Performance"
+author: "Bryan Winmill - winmill2 AND Justin Cherry - wcherry2 - Final Project"
 date: "7/17/2019"
 output:
   html_document: 
