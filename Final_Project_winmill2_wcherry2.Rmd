@@ -144,7 +144,7 @@ abline(0,1, col = "darkorange")
 
 - This graph above is very generic... So we wanted to show more personalized results. 
 
-- Say someone going to Brigham Young University (Provo) wanted to see a prediction for about how well (What will be their Win-Loss ratio) the Cougars will do in a season. Having the following information - SRS = 7.56, SOS = 3.54, To = 2019, From = 1903, Yrs = 117, CTRN = 3, AP = 10, CREG = 25, NC = 0... We could make a prediction for what their Win-Loss ratio will be.
+- Say someone going to Brigham Young University (Provo) wanted to see a prediction for about how well (What will be their Win-Loss ratio) the Cougars will do in a season. Having the following information - SRS = 7.56, SOS = 3.54, To = 2019, From = 1903, Yrs = 117, CTRN = 3, AP = 10, CREG = 25, NC = 0... We could make a prediction for what their Win-Loss ratio will be using our model.
 
 ```{r}
 cougar_prediction = data.frame(SRS = 7.56,
@@ -161,7 +161,7 @@ predicted = predict(modified_forward_BIC, newdata = cougar_prediction)
 actual = schoolData[35, 11]
 ```
 
-- As you can see, with that information the predicted Win-Loss ration was `r predicted` and the actual Win-Loss ratio was `r actual`. The prediction was off by `r actual-predicted` which is pretty close. The Cougar fan would then know that their team will probably win a little more than half of their games.
+- As you can see, with that information the predicted Win-Loss ration was `r predicted` and the actual Win-Loss ratio was `r actual`. The prediction was off by `r actual-predicted` which is `r (actual-predicted)*100`%... That is pretty close. The Cougar fan would then know that their team will probably win a little more than half of their games.
 
 
 ### Discussion
