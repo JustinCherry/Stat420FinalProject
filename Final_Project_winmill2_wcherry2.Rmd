@@ -149,7 +149,7 @@ abline(0,1, col = "darkorange")
 - Say someone going to Brigham Young University (Provo) wanted to see a prediction for about how well (What will be their Win-Loss ratio) the Cougars will do in a season. Having the following information - SRS = 7.56, SOS = 3.54, To = 2019, From = 1903, Yrs = 117, CTRN = 3, AP = 10, CREG = 25, NC = 0... We could make a prediction for what their Win-Loss ratio will be.
 
 ```{r}
-prediction = data.frame(SRS = 7.56,
+cougar_prediction = data.frame(SRS = 7.56,
                         SOS = 3.54,
                         To = 2019,
                         From = 1903,
@@ -159,7 +159,7 @@ prediction = data.frame(SRS = 7.56,
                         CREG = 25,
                         NC = 0
                         )
-predicted = predict(modified_forward_BIC, newdata = prediction)
+predicted = predict(modified_forward_BIC, newdata = cougar_prediction)
 actual = schoolData[35, 11]
 ```
 
