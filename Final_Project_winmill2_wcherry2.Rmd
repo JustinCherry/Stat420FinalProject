@@ -15,7 +15,7 @@ College basketball is a huge sport. Every season thousands of fans watch in anti
 
 So what if there was a way to predict this? What if we were able to analyze some statistics and form an accurate predition of how well a team would perform? We would be able to answer every fan's lingering question: "How will we do this season?"
 
-This is what we'll explore in this project. We will look at the data and see if there's a way to accurately predict a team's performance.
+This is what we'll explore in this project. We will look at the data and see if there's a way to accurately predict a team's performance given some information.
 
 **The Data:**
 
@@ -53,11 +53,14 @@ This is what we'll explore in this project. We will look at the data and see if 
 
   - renaming "W-L%" to just "WL". The '%' was interfering with the r code.  
   - separating "City,State" into "City" and "State". We wanted to be able to use city and state separately in our model.
+  - removing any rows that introduced null values.
   - converting "state" into a factor. This was one of our categorical variables, so we needed the factor.
   
+**Importing and cleaning the data, and then analyzing to fit the best model**
 ```{r message=FALSE}
 library(readr)
 library(lmtest)
+library("knitr")
 schoolData = read_csv("SchoolData.csv")
 #remove null values
 schoolData = na.omit(schoolData)
@@ -85,6 +88,7 @@ modified_forward_BIC = lm(WL ~ I(SRS ^ 2) + SOS + I(To ^ 2) + From + Yrs + CTRN 
 
 ```
 
+**A function to perform some tests to see how well our model is fit**
 ```{r}
 #function to test diagnostics of a given model including Shapiro test and normal variance and qq plots
 diagnostics = function(model, pcol = 'dodgerblue', lcol = 'darkorange', alpha = 0.05, plotit = TRUE, testit = TRUE)
@@ -113,22 +117,40 @@ diagnostics = function(model, pcol = 'dodgerblue', lcol = 'darkorange', alpha = 
 }
 ```
 
-### Results
-The results section should contain numerical or graphical summaries of your results. You should report a final model you have chosen. There is not necessarily one, singular correct model, but certainly some methods and models are better than others in certain situations. You may use any methods we studied this semester to complete this task and provide evidence that your final choice of model is a good one.
+**A function to predict/collect data and display it in a clean way**
+```{r}
+#function to create a good looking table to display statistics for a certain team
+showTable = function(model, data, row)
+{
+  predicted = predict(model, newdata = data)
+  actual = schoolData[row, 11]
 
-- The model we decided was best for our test was the model using the predictors - From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC (Code for model included below). We started off with the full_model. With the full_model we performed a backwards AIC and BIC. However, in both of these results was chosen the predictors G and L... Knowing what those are (Games played and Loses), you would be able to calculate exactly what the Win-Loss ratio would be. We figured that this was probably not the best model to choose because it would make it so that we couldn't figure out if the other predictors were useful or not in determining Win-Loss ratio. We decided not to use either G or L, and that is why we decided to perform a forward BIC. We started from a null_model, and then made it so that its scope was all of the predictors except a few... two of those being W or L (Wins or Losses). We did this to make sure neither of those were selected as predictors. We then ran the forward BIC and got better model. However, it still wasn't where we wanted it. So we decided to throw in some interactions to see if we could get better results in the Fitted vs Residuals plot, the QQ plot, and the Shapiro test. After making some modifications, we ended up with the below model that we were pleased with.
+  winLoss = rbind(c("Predicted", predicted, format(round((predicted)*100, 2), nsmall = 2)), c("Actual", actual,      format(round((actual)*100, 2), nsmall = 2)))
+
+  table = kable(winLoss, format = "markdown", col.names = c("", "Ratio", "Percentage"))
+  
+  output = list("predicted" = predicted, "actual" = actual, "table" = table)
+  
+  return(output)
+}
+```
+
+
+### Results
+
+- The model we decided was best for our test was the model using the predictors - From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC (Code for model included below). We started off with the full_model. With the full_model we performed a backwards AIC and BIC. However, in both of these results was chosen the predictors G and L... Knowing what those are (Games played and Loses), you would be able to calculate exactly what the win-loss ratio would be. We figured that this was probably not the best model to choose because it would make it so that we couldn't figure out if the other predictors were useful or not in determining win-loss ratio. We decided not to use either G or L, and that is why we decided to perform a forward BIC. We started from a null_model, and then made it so that its scope was all of the predictors except a few... two of those being W or L (Wins or Losses). We did this to make sure neither of those were selected as predictors. We then ran the forward BIC and got better model. However, it still wasn't where we wanted it. So we decided to throw in some interactions to see if we could get better results in the Fitted vs Residuals plot, the QQ plot, and the Shapiro test. After making some modifications, we ended up with the below model that we were pleased with (It ended up not needed W, L, or G in order to get a good model).
 
 ```{r}
 modified_forward_BIC = lm(WL ~ I(SRS ^ 2) + SOS + I(To ^ 2) + From + Yrs + CTRN + I(AP ^ 2) + I(CREG ^ 2) + I(NC ^ 2), data = school_trn_data)
 ```
 
-- Below you can see the results of some of the tests we performed.
+- Below you can see the results of some of the tests we performed. In the diagnostics function, we create a Fitted vs Residuals Plot, a QQ plot, and then we do a Shapiro test and make a decision based on the p-value returned. This diagnostic function was very useful in order for us to keep improving the model.
 
 ```{r}
 diagnostics(modified_forward_BIC)
 ```
 
-- Also, we compared the predicted vs actual data points to see how accurate/well our model did.
+- Also, we compared the predicted vs actual data points to see how accurate/well our model did. This makes a prediction using the school_tst_data for each of the schools. It then takes the actual values and compared them in a plot against the predicted values. This was helpful to us so that we could see if the points followed a pattern and if so, how accurate they were.
 
 ```{r}
 pred_vals = predict(modified_forward_BIC, newdata = school_tst_data)
@@ -142,52 +164,78 @@ plot(act_vals ~ pred_vals,col = 'dodgerblue',
 abline(0,1, col = "darkorange")
 ```
 
-- The graph above is very generic... So we wanted to show more personalized results. 
+- The graph above is very generic... So we wanted to show more personalized results (For any team specific fans). 
 
-- Say someone going to Brigham Young University (Provo - close to where we are from) wanted to see a prediction for about how well the Cougars will do in a season. Having the following information - SRS = 7.56, SOS = 3.54, To = 2019, From = 1903, Yrs = 117, CTRN = 3, AP = 10, CREG = 25, NC = 0... We could make a prediction for what their Win-Loss ratio will be using our model.
+**Prediction for Brigham Young University**
+
+- Say someone going to Brigham Young University (Provo - close to where we are from) wanted to see a prediction for about how well the Cougars will do in a season. Having the following information - SRS = 7.56, SOS = 3.54, To = 2019, From = 1903, Yrs = 117, CTRN = 3, AP = 10, CREG = 25, NC = 0... We could make a prediction for what their win-loss ratio will be using our model.
 
 ```{r}
 cougar_prediction = data.frame(SRS = 7.56,
-                        SOS = 3.54,
-                        To = 2019,
-                        From = 1903,
-                        Yrs = 117,
-                        CTRN = 3,
-                        AP = 10,
-                        CREG = 25,
-                        NC = 0
-                        )
-predicted = predict(modified_forward_BIC, newdata = cougar_prediction)
-actual = schoolData[35, 11]
+                               SOS = 3.54,
+                               To = 2019,
+                               From = 1903,
+                               Yrs = 117,
+                               CTRN = 3,
+                               AP = 10,
+                               CREG = 25,
+                               NC = 0)
+
+cougars = showTable(modified_forward_BIC, cougar_prediction, 35)
+cougars$table
 ```
 
-- As you can see, with that information the predicted Win-Loss ratio was `r predicted` and the actual Win-Loss ratio was `r actual`. The prediction was off by `r actual-predicted` which is `r format(round((actual-predicted)*100, 2), nsmall = 2)`%... That is pretty close. The Cougar fan would then know that their team will probably win a little more than half of their games.
+- As you can see, with that information the predicted win-loss ratio was `r cougars$predicted` (`r format(round((cougars$predicted)*100, 2), nsmall = 2)`%) and the actual win-loss ratio was `r cougars$actual` (`r format(round((cougars$actual)*100, 2), nsmall = 2)`%). The prediction was off by `r cougars$actual-cougars$predicted` which is `r format(round((cougars$actual-cougars$predicted)*100, 2), nsmall = 2)`%... That is pretty close. The Cougar fan would then know that their team will probably win a little more than half of their games.
 
-- Another example: The University of Illinois.
+**Prediction for The University of Illinois**
 
-- Using their data - SRS = 12.76, SOS = 7.65, To = 2019, From = 1906, Yrs = 114, CTRN = 2, AP = 26, CREG = 17, NC = 0
+- Another example using the data from The University of Illinois - SRS = 12.76, SOS = 7.65, To = 2019, From = 1906, Yrs = 114, CTRN = 2, AP = 26, CREG = 17, NC = 0.
 
 ```{r}
 illiniwek_prediction = data.frame(SRS = 12.76,
-                        SOS = 7.65,
-                        To = 2019,
-                        From = 1906,
-                        Yrs = 114,
-                        CTRN = 2,
-                        AP = 26,
-                        CREG = 17,
-                        NC = 0
-                        )
-predicted = predict(modified_forward_BIC, newdata = illiniwek_prediction)
-actual = schoolData[133, 11]
+                                  SOS = 7.65,
+                                  To = 2019,
+                                  From = 1906,
+                                  Yrs = 114,
+                                  CTRN = 2,
+                                  AP = 26,
+                                  CREG = 17,
+                                  NC = 0)
+
+illiniweks = showTable(modified_forward_BIC, illiniwek_prediction, 133)
+illiniweks$table
 ```
 
-- With that information the predicted Win-Loss ratio was `r predicted` and the actual Win-Loss ratio was `r actual`. The prediction was off by `r actual-predicted` which is `r format(round((actual-predicted)*100, 2), nsmall = 2)`%... Again, that is pretty close and is within 10%. The Illinois fan would then know that their team has a good chance to win a little more than half of their games as well.
+- With that information the predicted win-loss ratio was `r illiniweks$predicted` (`r format(round((illiniweks$predicted)*100, 2), nsmall = 2)`%) and the actual win-loss ratio was `r illiniweks$actual` (`r format(round((illiniweks$actual)*100, 2), nsmall = 2)`%). The prediction was off by `r illiniweks$actual-illiniweks$predicted` which is `r format(round((illiniweks$actual-illiniweks$predicted)*100, 2), nsmall = 2)`%... Again, that is pretty close and is within 10%. The Illinois fan would then know that their team has a good chance to win a little more than half of their games as well.
+
+**Another Prediction**
+
+- In this one, we just wanted to show a prediction that was very close.
+
+- Boston University - SRS = -6.84, SOS = -5.48, To = 2019, From = 1916, Yrs = 93, CTRN = 6, AP = 0, CREG = 8, NC = 0
+
+```{r}
+other_prediction = data.frame(SRS = -6.84,
+                   SOS = -5.48,
+                   To = 2019,
+                   From = 1916,
+                   Yrs = 93,
+                   CTRN = 6,
+                   AP = 0,
+                   CREG = 8,
+                   NC = 0)
+
+another = showTable(modified_forward_BIC, other_prediction, 32)
+another$table
+```
+
+- With this other information, the predicted win-loss ratio was `r another$predicted` (`r format(round((another$predicted)*100, 2), nsmall = 2)`%) and the actual win-loss ratio was `r another$actual` (`r format(round((another$actual)*100, 2), nsmall = 2)`%). The prediction was off by `r another$predicted-another$actual` which is `r format(round((another$predicted-another$actual)*100, 2), nsmall = 2)`%. 
+
+- So you can see that while these predictions vary between really close and about 10% off, they are fairly consistent and can give a pretty good estimate as to what a teams win-loss ratio will be.
 
 ### Discussion
-The discussion section should contain discussion of your results. This should frame your results in the context of the data. How is your final model useful?
 
-- After analyzing the different variables, we came to the conclusion that the best model was using From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC as the predictors (some of them considering interactions). These variables give information including when a team started playing in the seasons, how long they have been playing, the strength of their schedule (how difficult the teams are they were playing), and even some of the results in championships (whether they won or lost). Using these variables we were able to create a model and create a graph that would show how close we could predict a teams Win Loss ration based on these predictors. Looking at the graph you can see that the predictions aren't perfect, but they can give a pretty good guess as to what a teams win loss ration will be. Just by looking at the graph you can see that with those predictors, it was able to guess within about 10% their win loss ratios. I feel like this is pretty good considering all the other models we looked at and how bad they seemed to be.
+- After analyzing the different variables, we came to the conclusion that the best model was using From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC as the predictors (some of them considering interactions). These variables give information including when a team started playing in the seasons, how long they have been playing, the strength of their schedule (how difficult the teams are they were playing), and even some of the results in championships (a count of championships won). Using these variables we were able to create a model and create a graph that would show how close we could predict a teams win-loss ration based on these predictors. Looking at the graph you can see that the predictions aren't perfect, but they can give a pretty good guess as to what a teams win-loss ration will be. Just by looking at the graph you can see that with those predictors, it was able to guess within about 10% their win-loss ratios. I feel like this is pretty good considering all the other models we looked at and how bad they seemed to be.
 
 - Also, we threw in a Fitted vs Residuals model and a QQ plot. Both of these had the best results with the model we selected after breaking it down to the best version. While it still could be up for consideration whether the assumptions are violated, it is definitely better than the other models we had analyzed. We were able to get the p-value of the shapiro test above 0.05 which also was a good reason for the decision "fail to reject".
 
@@ -200,8 +248,6 @@ The discussion section should contain discussion of your results. This should fr
     -moz-columns: 3 100px;
   }
 </style>
-
-The appendix section should contain code and analysis that is used, but that may clutter the report or is not directly related to the choice of mode
 
 ```{r, eval = FALSE}
 
