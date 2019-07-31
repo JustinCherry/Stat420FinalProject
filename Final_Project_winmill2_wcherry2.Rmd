@@ -25,7 +25,7 @@ This is what we'll explore in this project. We will look at the data and see if 
 <div class="col3">
 - **Rank:** Rank of School
 - **School:** Name of School
-- **City:** School location (categorical predictor)
+- **City:** School location 
 - **State:** School location (categorical predictor)
 - **From:** First year classified as Division I (categorical predictor
 - **To:** Last year classified as Division I (categorical predictor)
@@ -52,9 +52,9 @@ This is what we'll explore in this project. We will look at the data and see if 
 - We've made slight alterations to the original dataset including:
 
   - renaming "W-L%" to just "WL". The '%' was interfering with the r code.  
-  - separating "City,State" into "City" and "State". We wanted to be able to use city and state separately in our model.
+  - separating "City,State" into "City" and "State". We wanted to be able to use state separately in our model.
   - removing any rows that introduced null values.
-  - converting "state" into a factor. This was one of our categorical variables, so we needed the factor.
+  - converting "state" into a factor as this was one of our categorical variables.
   
 **Importing and cleaning the data, and then analyzing to fit the best model**
 ```{r message=FALSE}
@@ -138,19 +138,33 @@ showTable = function(model, data, row)
 
 ### Results
 
-- The model we decided was best for our test was the model using the predictors - From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC (Code for model included below). We started off with the full_model. With the full_model we performed a backwards AIC and BIC. However, in both of these results was chosen the predictors G and L... Knowing what those are (Games played and Loses), you would be able to calculate exactly what the win-loss ratio would be. We figured that this was probably not the best model to choose because it would make it so that we couldn't figure out if the other predictors were useful or not in determining win-loss ratio. We decided not to use either G or L, and that is why we decided to perform a forward BIC. We started from a null_model, and then made it so that its scope was all of the predictors except a few... two of those being W or L (Wins or Losses). We did this to make sure neither of those were selected as predictors. We then ran the forward BIC and got better model. However, it still wasn't where we wanted it. So we decided to throw in some interactions to see if we could get better results in the Fitted vs Residuals plot, the QQ plot, and the Shapiro test. After making some modifications, we ended up with the below model that we were pleased with (It ended up not needed W, L, or G in order to get a good model).
+- The model we decided was best for our test was the model using the predictors - From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC (Code for model included below). 
 
 ```{r}
 modified_forward_BIC = lm(WL ~ I(SRS ^ 2) + SOS + I(To ^ 2) + From + Yrs + CTRN + I(AP ^ 2) + I(CREG ^ 2) + I(NC ^ 2), data = school_trn_data)
 ```
 
-- Below you can see the results of some of the tests we performed. In the diagnostics function, we create a Fitted vs Residuals Plot, a QQ plot, and then we do a Shapiro test and make a decision based on the p-value returned. This diagnostic function was very useful in order for us to keep improving the model.
+**Building the Model:**
+
+- We started off with the full_model and performed a backwards AIC and BIC. However, we quickly realized that the predictors W and L(Wins and Loses) were determining our response perfectly, since W/L = WL. We figured that this was not a good model because it wouldn't allow us to know if other predictors were useful or not in determining win-loss ratio, So we decided not to use either G (Games Played) or L.
+
+- With that in mind, we decided to perform a forward BIC. We started from a null_model, with the scope of all predictors minus W and L (Wins and Losses). This provided better results, but it still wasn't where we wanted it. 
+
+- So we decided to throw in some interactions to see if we could get better results in the Fitted vs Residuals plot, the QQ plot, and the Shapiro test. After making some modifications, we ended up with the final model that we were pleased with (It ended up not needed W, L, or G in order to get a good model).
+
+**Testing the Model:**
+
+- Below you can see the results of tests we performed. In the diagnostics function, we create a Fitted vs Residuals Plot, a QQ plot, and then we do a Shapiro test and make a decision based on the p-value returned. This diagnostic function was very useful in order for us to keep improving the model.
 
 ```{r}
 diagnostics(modified_forward_BIC)
 ```
 
-- Also, we compared the predicted vs actual data points to see how accurate/well our model did. This makes a prediction using the school_tst_data for each of the schools. It then takes the actual values and compared them in a plot against the predicted values. This was helpful to us so that we could see if the points followed a pattern and if so, how accurate they were.
+**Model Accuracy**
+
+- Once we had an acceptable model, we wanted to see how accurate it was. For that, we had split the original dataset for 80% train data (for building the model) and 20% test data (for testing). 
+
+- We then compared the predicted values from using the model to actual data points from the test data to see how accurate our model was. We've plotted the results below.
 
 ```{r}
 pred_vals = predict(modified_forward_BIC, newdata = school_tst_data)
@@ -164,80 +178,65 @@ plot(act_vals ~ pred_vals,col = 'dodgerblue',
 abline(0,1, col = "darkorange")
 ```
 
-- The graph above is very generic... So we wanted to show more personalized results (For any team specific fans). 
 
-**Prediction for Brigham Young University**
+**Specific Predictions:**
 
-- Say someone going to Brigham Young University (Provo - close to where we are from) wanted to see a prediction for about how well the Cougars will do in a season. Having the following information - SRS = 7.56, SOS = 3.54, To = 2019, From = 1903, Yrs = 117, CTRN = 3, AP = 10, CREG = 25, NC = 0... We could make a prediction for what their win-loss ratio will be using our model.
+- The graph above is very generic, so we wanted to show more personalized results (For any team specific fans). 
 
+- **Prediction for Brigham Young University**
+
+  - Since we're close to Brigham Young University, we wanted to see a prediction for about how well the Cougars will do in a season. Using data from the original dataset for the predictors, we could make a prediction for what BYU's win-loss ratio will be using our model.
 ```{r}
-cougar_prediction = data.frame(SRS = 7.56,
-                               SOS = 3.54,
-                               To = 2019,
-                               From = 1903,
-                               Yrs = 117,
-                               CTRN = 3,
-                               AP = 10,
-                               CREG = 25,
-                               NC = 0)
+cougar_prediction = data.frame(SRS = 7.56, SOS = 3.54, To = 2019, From = 1903, Yrs = 117, CTRN = 3, AP = 10, CREG = 25, NC = 0)
 
 cougars = showTable(modified_forward_BIC, cougar_prediction, 35)
 cougars$table
 ```
 
-- As you can see, with that information the predicted win-loss ratio was `r cougars$predicted` (`r format(round((cougars$predicted)*100, 2), nsmall = 2)`%) and the actual win-loss ratio was `r cougars$actual` (`r format(round((cougars$actual)*100, 2), nsmall = 2)`%). The prediction was off by `r cougars$actual-cougars$predicted` which is `r format(round((cougars$actual-cougars$predicted)*100, 2), nsmall = 2)`%... That is pretty close. The Cougar fan would then know that their team will probably win a little more than half of their games.
+-
 
-**Prediction for The University of Illinois**
+  - You can see the predicted win-loss ratio was only off by `r format(round((cougars$actual-cougars$predicted)*100, 2), nsmall = 2)`%. That is pretty close. The Cougar fan would then know that their team will probably win a little more than half of their games.
 
-- Another example using the data from The University of Illinois - SRS = 12.76, SOS = 7.65, To = 2019, From = 1906, Yrs = 114, CTRN = 2, AP = 26, CREG = 17, NC = 0.
+
+
+- **Prediction for The University of Illinois**
+
+  - Another example using the data from The University of Illinois: 
 
 ```{r}
-illiniwek_prediction = data.frame(SRS = 12.76,
-                                  SOS = 7.65,
-                                  To = 2019,
-                                  From = 1906,
-                                  Yrs = 114,
-                                  CTRN = 2,
-                                  AP = 26,
-                                  CREG = 17,
-                                  NC = 0)
+illiniwek_prediction = data.frame(SRS = 12.76, SOS = 7.65, To = 2019, From = 1906, Yrs = 114, CTRN = 2, AP = 26, CREG = 17, NC = 0)
 
 illiniweks = showTable(modified_forward_BIC, illiniwek_prediction, 133)
 illiniweks$table
 ```
 
-- With that information the predicted win-loss ratio was `r illiniweks$predicted` (`r format(round((illiniweks$predicted)*100, 2), nsmall = 2)`%) and the actual win-loss ratio was `r illiniweks$actual` (`r format(round((illiniweks$actual)*100, 2), nsmall = 2)`%). The prediction was off by `r illiniweks$actual-illiniweks$predicted` which is `r format(round((illiniweks$actual-illiniweks$predicted)*100, 2), nsmall = 2)`%... Again, that is pretty close and is within 10%. The Illinois fan would then know that their team has a good chance to win a little more than half of their games as well.
+- With that information the prediction was off by `r format(round((illiniweks$actual-illiniweks$predicted)*100, 2), nsmall = 2)`%. Again, that is pretty close and is within 10%. The Illinois fan would then know that their team has a good chance to win a little more than half of their games as well.
 
-**Another Prediction**
+- **A Final Prediction**
 
-- In this one, we just wanted to show a prediction that was very close.
-
-- Boston University - SRS = -6.84, SOS = -5.48, To = 2019, From = 1916, Yrs = 93, CTRN = 6, AP = 0, CREG = 8, NC = 0
+  - For this one, we just wanted to show a prediction that was very close. We chose information from Boston University.
 
 ```{r}
-other_prediction = data.frame(SRS = -6.84,
-                   SOS = -5.48,
-                   To = 2019,
-                   From = 1916,
-                   Yrs = 93,
-                   CTRN = 6,
-                   AP = 0,
-                   CREG = 8,
-                   NC = 0)
+other_prediction = data.frame(SRS = -6.84, SOS = -5.48, To = 2019, From = 1916, Yrs = 93, CTRN = 6, AP = 0, CREG = 8,NC = 0)
 
 another = showTable(modified_forward_BIC, other_prediction, 32)
 another$table
 ```
 
-- With this other information, the predicted win-loss ratio was `r another$predicted` (`r format(round((another$predicted)*100, 2), nsmall = 2)`%) and the actual win-loss ratio was `r another$actual` (`r format(round((another$actual)*100, 2), nsmall = 2)`%). The prediction was off by `r another$predicted-another$actual` which is `r format(round((another$predicted-another$actual)*100, 2), nsmall = 2)`%. 
+- With this final information, the prediction was off by `r format(round((another$predicted-another$actual)*100, 2), nsmall = 2)`%. 
 
-- So you can see that while these predictions vary between really close and about 10% off, they are fairly consistent and can give a pretty good estimate as to what a teams win-loss ratio will be.
+- So you can see that while these predictions vary between really close and about 10% off, they are fairly consistent and can give a pretty good estimate as to what a team's win-loss ratio will be.
 
 ### Discussion
 
-- After analyzing the different variables, we came to the conclusion that the best model was using From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC as the predictors (some of them considering interactions). These variables give information including when a team started playing in the seasons, how long they have been playing, the strength of their schedule (how difficult the teams are they were playing), and even some of the results in championships (a count of championships won). Using these variables we were able to create a model and create a graph that would show how close we could predict a teams win-loss ration based on these predictors. Looking at the graph you can see that the predictions aren't perfect, but they can give a pretty good guess as to what a teams win-loss ration will be. Just by looking at the graph you can see that with those predictors, it was able to guess within about 10% their win-loss ratios. I feel like this is pretty good considering all the other models we looked at and how bad they seemed to be.
+- After analyzing the different variables, we came to the conclusion that the best model was using variables that give information including when a team started playing, how long they have been playing, the strength of their schedule (how difficult the teams are they were playing), and a count of championships won. 
 
-- Also, we threw in a Fitted vs Residuals model and a QQ plot. Both of these had the best results with the model we selected after breaking it down to the best version. While it still could be up for consideration whether the assumptions are violated, it is definitely better than the other models we had analyzed. We were able to get the p-value of the shapiro test above 0.05 which also was a good reason for the decision "fail to reject".
+- Using these variables we were able to create a model and graph that would show how close we could predict a team's win-loss ratio. 
+
+- Looking at the graph you can see that the predictions aren't perfect, but they give a decent prediction (within about 10%) of win-loss ratios, all things considered. 
+
+
+- In conclusion, college basketball fans now have a way of predicting how their team will perform given the right information. Fans can now plug in their school's From, To, Yrs, SRS, SOS, CTRN, AP, CREG, and NC information and get back a prediction that will be within 10% of their performance ratio. 
 
 ### Appendix 
 
@@ -267,18 +266,3 @@ backward_BIC = step(full_model, direction = "backward", k = log(n), trace = 0)
 big_mod_cd = cooks.distance(modified_forward_BIC)
 sum(big_mod_cd > 4 / length(modified_forward_BIC))
 ```
-
-### Rubric - TODO: Remove before submission
-
-DUE: Sat, 8/3/2019
-Introduction (10 pts): This section fully provides background to your work such that a reader understands the purpose and goal of the data analysis project.
-
-Methods (20 pts): This section will contain the bulk of the modeling decisions and R code that is used to generate the results. Have you used the appropriate methods for your dataset? Have you applied them correctly?
-
-Results (15 pts): This section contains numerical or graphical summaries of your results as they pertain to the goal of the project. Do you arrive at the correct statistical conclusions from the analyses you perform? Did you make appropriate adjustments to your model selection and methods based on your results?
-
-Discussion (15 pts): This section provides a full discussion of the results. It should include your observations and analysis that tie the Introduction, Methods, and Results together. The discussion should address the primary statistical themes of the analysis and your discoveries, and your interpretation of the results. Do you discuss your analysis results in the context of the data?
-
-RMarkdown Usage and Programming Efficacy (15 pts): The Rmd file performs the required tasks in an efficient method and is fully correct. The simulated data is created, read, and accessed according to best practices. The R and RMarkdown usage address the needs of the Methods section and produces what is displayed in the Results section. Does your code perform the desired task? Is your code readable?
-
-Neatness and Organization of the Report and Rmd files (15 pts): The Rmd file and Report are written and presented in a conventional style using appropriate spacing that is easy to read. The Report attempts to answer what was asked for in the directions and addressed in the Introduction. Plots are easily readable and self-explanatory. R output is limited to what is necessary to directly answer the exercise. Is your report easy to read? Is it written in a manner such that a reader does not already need to be familiar with the data?
